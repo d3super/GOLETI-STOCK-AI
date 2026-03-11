@@ -1,0 +1,222 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Sparkles, BarChart3, ShieldAlert, Zap, LogIn } from 'lucide-react';
+import Markdown from 'react-markdown';
+import { Message } from '../services/gemini';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import { User } from 'firebase/auth';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+interface ChatAreaProps {
+  messages: Message[];
+  onSendMessage: (content: string) => void;
+  isLoading: boolean;
+  user: User | null;
+  onLogin: () => void;
+}
+
+export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isLoading, user, onLogin }) => {
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() && !isLoading) {
+      onSendMessage(input);
+      setInput('');
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col h-screen bg-dark-bg relative">
+      {/* Header */}
+      <div className="h-16 border-b border-border-color flex items-center justify-between px-8 bg-dark-bg/80 backdrop-blur-md sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/logo.png" 
+            alt="Goleti Logo" 
+            className="w-6 h-6 rounded-md object-cover"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+            }}
+          />
+          <span className="font-semibold text-text-primary">Goleti AI Analyst</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-secondary-bg px-2 py-1 rounded-md border border-border-color">
+            <Zap size={12} className="text-yellow-500" />
+            <span>GPT-4o Equivalent</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8">
+            <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-border-color">
+              <img 
+                src="/logo.png" 
+                alt="Goleti Logo" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+                }}
+              />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-4">How can I help your portfolio today?</h2>
+              <p className="text-text-secondary text-lg">
+                Ask me to analyze a stock, compare competitors, or explain complex financial concepts.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={cn(
+              "flex w-full",
+              msg.role === 'user' ? "justify-end" : "justify-start"
+            )}
+          >
+            <div
+              className={cn(
+                "max-w-[85%] rounded-2xl p-6",
+                msg.role === 'user' 
+                  ? "bg-secondary-bg text-text-primary border border-border-color" 
+                  : "bg-secondary-bg/30 text-text-primary border border-transparent"
+              )}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden",
+                  msg.role === 'user' ? "bg-primary-green/20 text-primary-green" : "bg-white"
+                )}>
+                  {msg.role === 'user' ? <UserIcon size={16} /> : (
+                    <img 
+                      src="/logo.png" 
+                      alt="Goleti" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+                      }}
+                    />
+                  )}
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
+                  {msg.role === 'user' ? 'You' : 'Goleti AI'}
+                </span>
+              </div>
+              <div className="markdown-body">
+                <Markdown>{msg.content}</Markdown>
+              </div>
+            </div>
+          </div>
+        ))}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-secondary-bg/30 rounded-2xl p-6 border border-transparent max-w-[85%]">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/logo.png" 
+                    alt="Goleti" 
+                    className="w-full h-full object-cover animate-pulse"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+                    }}
+                  />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">Goleti AI is thinking...</span>
+              </div>
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-primary-green rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-2 h-2 bg-primary-green rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-2 h-2 bg-primary-green rounded-full animate-bounce" />
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Bar */}
+      <div className="p-6 bg-dark-bg relative">
+        {!user && (
+          <div className="absolute inset-0 bg-dark-bg/60 backdrop-blur-sm z-20 flex items-center justify-center p-6">
+            <div className="bg-secondary-bg border border-border-color p-6 rounded-2xl shadow-2xl max-w-md w-full text-center">
+              <h3 className="text-xl font-bold mb-2">Unlock Full Analysis</h3>
+              <p className="text-text-secondary text-sm mb-6">Login with Google to start analyzing stocks with Goleti AI.</p>
+              <button 
+                onClick={onLogin}
+                className="w-full py-3 bg-primary-green hover:bg-emerald-600 text-dark-bg font-bold rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <LogIn size={18} />
+                Continue with Google
+              </button>
+            </div>
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative">
+          <div className="flex items-center gap-3 bg-secondary-bg border border-border-color rounded-2xl p-2 focus-within:border-primary-green transition-colors shadow-2xl">
+            <button type="button" className="p-3 text-text-secondary hover:text-primary-green transition-colors">
+              <BarChart3 size={20} />
+            </button>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Enter a ticker (e.g. AAPL) or ask a question..."
+              className="flex-1 bg-transparent border-none focus:ring-0 text-text-primary placeholder:text-text-secondary py-3 px-2"
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className={cn(
+                "p-3 rounded-xl transition-all active:scale-90",
+                input.trim() && !isLoading ? "bg-primary-green text-dark-bg shadow-lg shadow-primary-green/20" : "bg-border-color text-text-secondary"
+              )}
+            >
+              <Send size={20} />
+            </button>
+          </div>
+        </form>
+        <p className="text-[10px] text-center text-text-secondary mt-4 uppercase tracking-widest opacity-50">
+          Goleti can make mistakes. Always verify financial data.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Simple Icons
+const TrendingUpIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+
+const UserIcon = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+  </svg>
+);

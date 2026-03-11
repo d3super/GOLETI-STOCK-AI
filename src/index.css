@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary-green: #00C087;
+  --color-dark-bg: #0F1115;
+  --color-secondary-bg: #1A1D24;
+  --color-border-color: #2A2F3A;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A0A7B4;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-text-primary font-sans antialiased;
+  }
+}
+
+.markdown-body h1 { @apply text-2xl font-bold mb-4 mt-6; }
+.markdown-body h2 { @apply text-xl font-bold mb-3 mt-5; }
+.markdown-body h3 { @apply text-lg font-bold mb-2 mt-4; }
+.markdown-body p { @apply mb-4 text-text-secondary leading-relaxed; }
+.markdown-body ul { @apply list-disc pl-6 mb-4 space-y-2 text-text-secondary; }
+.markdown-body ol { @apply list-decimal pl-6 mb-4 space-y-2 text-text-secondary; }
+.markdown-body table { @apply w-full border-collapse mb-4 overflow-hidden rounded-lg border border-border-color; }
+.markdown-body th { @apply bg-secondary-bg p-3 text-left font-semibold border-b border-border-color; }
+.markdown-body td { @apply p-3 border-b border-border-color text-sm; }
+.markdown-body strong { @apply text-primary-green font-semibold; }
+.markdown-body blockquote { @apply border-l-4 border-primary-green pl-4 italic my-4 text-text-secondary; }
