@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BarChart3, ShieldAlert, Zap, LogIn, TrendingUp as TrendingUpIcon, User as UserIcon } from 'lucide-react';
+import { Send, Sparkles, BarChart3, ShieldAlert, Zap, LogIn } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { Message } from '../services/gemini';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { User } from 'firebase/auth';
-import { MarketOverview } from './MarketOverview';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -59,22 +58,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isL
       {/* Messages */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center max-w-5xl mx-auto space-y-12 py-12">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="w-24 h-24 bg-primary-green rounded-3xl flex items-center justify-center shadow-2xl border border-border-color">
-                <TrendingUpIcon className="w-12 h-12 text-dark-bg" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold mb-4">How can I help your portfolio today?</h2>
-                <p className="text-text-secondary text-lg max-w-2xl">
-                  Ask me to analyze a stock, compare competitors, or explain complex financial concepts.
-                </p>
-              </div>
+          <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8">
+            <div className="w-24 h-24 bg-primary-green rounded-3xl flex items-center justify-center shadow-2xl border border-border-color">
+              <TrendingUpIcon className="w-12 h-12 text-dark-bg" />
             </div>
-
-            {/* Market Overview Feature */}
-            <div className="w-full">
-              <MarketOverview />
+            <div>
+              <h2 className="text-3xl font-bold mb-4">How can I help your portfolio today?</h2>
+              <p className="text-text-secondary text-lg">
+                Ask me to analyze a stock, compare competitors, or explain complex financial concepts.
+              </p>
             </div>
           </div>
         )}
@@ -183,4 +175,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isL
   );
 };
 
-// Simple Icons removed as they are now imported from lucide-react or replaced
+// Simple Icons
+const TrendingUpIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+
+const UserIcon = ({ size }: { size: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+  </svg>
+);
