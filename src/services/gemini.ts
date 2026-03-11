@@ -1,7 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-
 export interface Message {
   id: string;
   role: "user" | "model";
@@ -57,7 +55,21 @@ Rules:
 - **Search Grounding**: Always pull the latest data using Google Search.
 - **No Financial Advice**: Never promise profit or give specific buy/sell commands. Always state that these are for educational purposes.`;
 
+const getApiKey = () => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key || key === "" || key === "undefined" || key === "MY_GEMINI_API_KEY") {
+    return null;
+  }
+  return key;
+};
+
 export async function* chatWithGoletiStream(messages: Message[]) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing. Please ensure you have set the GEMINI_API_KEY environment variable in your Vercel project settings.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
   // Use gemini-3-flash-preview for significantly faster response times
   const model = "gemini-3-flash-preview";
   
@@ -86,7 +98,12 @@ export async function* chatWithGoletiStream(messages: Message[]) {
 }
 
 export async function chatWithGoleti(messages: Message[]) {
-  // Fallback to non-streaming if needed, but using flash for speed
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-3-flash-preview";
   
   const chat = ai.chats.create({
@@ -112,7 +129,12 @@ export async function chatWithGoleti(messages: Message[]) {
 }
 
 export async function getQuickAnalysis(ticker: string) {
-  // Use gemini-3-flash-preview for fast search-based analysis
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is missing.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Analyze the stock ticker: ${ticker}. Provide a concise summary including current price, recent trend, and key fundamental metrics.`,
