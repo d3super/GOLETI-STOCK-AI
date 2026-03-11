@@ -2,23 +2,18 @@
   "entities": {
     "User": {
       "title": "User Profile",
-      "description": "Stores user subscription plan and basic info",
+      "description": "Stores user basic info and analysis usage",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "description": "Firebase Auth UID" },
         "email": { "type": "string", "description": "User email address" },
         "displayName": { "type": "string", "description": "User display name" },
         "photoURL": { "type": "string", "description": "User profile picture URL" },
-        "plan": { 
-          "type": "string", 
-          "enum": ["free", "standard", "pro"],
-          "description": "Subscription plan level"
-        },
         "analysisCount": { "type": "number", "description": "Number of analyses performed today" },
         "lastAnalysisDate": { "type": "string", "format": "date", "description": "Last date an analysis was performed" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "email", "plan"]
+      "required": ["uid", "email"]
     }
   },
   "firestore": {

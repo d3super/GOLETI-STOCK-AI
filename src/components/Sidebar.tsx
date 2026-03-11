@@ -22,7 +22,6 @@ interface SidebarProps {
   profile: UserProfile | null;
   onLogin: () => void;
   onLogout: () => void;
-  onOpenPricing: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -38,43 +37,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   profile,
   onLogin,
   onLogout,
-  onOpenPricing
 }) => {
-  const getPlanIcon = (plan?: string) => {
-    switch (plan) {
-      case 'pro': return <Crown size={14} className="text-amber-400" />;
-      case 'standard': return <Zap size={14} className="text-blue-400" />;
-      case 'admin': return <ShieldCheck size={14} className="text-purple-400" />;
-      default: return null;
-    }
-  };
-
-  const getPlanColor = (plan?: string) => {
-    switch (plan) {
-      case 'pro': return 'text-amber-400';
-      case 'standard': return 'text-blue-400';
-      case 'admin': return 'text-purple-400';
-      default: return 'text-text-secondary';
-    }
-  };
   return (
     <div className={cn(
       "bg-dark-bg border-r border-border-color h-screen flex flex-col transition-all duration-300 ease-in-out relative",
       isCollapsed ? "w-20" : "w-72"
     )}>
       <div className={cn("p-6 flex items-center gap-3", isCollapsed && "justify-center px-4")}>
-        <div className="w-10 h-10 bg-white rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg overflow-hidden border border-border-color">
-          <img 
-            src="/logo.png" 
-            alt="Goleti Logo" 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
-            }}
-          />
+        <div className="w-10 h-10 bg-primary-green rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg border border-border-color">
+          <TrendingUp size={24} className="text-dark-bg" />
         </div>
-        {!isCollapsed && <h1 className="text-2xl font-bold tracking-tight text-text-primary">Goleti</h1>}
+        {!isCollapsed && <h1 className="text-3xl font-black tracking-tighter text-text-primary">Goleti</h1>}
       </div>
 
       <div className={cn("px-4 mb-6", isCollapsed && "px-2")}>
@@ -131,19 +104,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <div className={cn("p-4 border-t border-border-color space-y-1", isCollapsed && "p-2")}>
-        {user && profile && profile.plan !== 'pro' && profile.plan !== 'admin' && !isCollapsed && (
-          <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-            <div className="text-xs font-bold text-emerald-500 mb-1">UPGRADE AVAILABLE</div>
-            <div className="text-[10px] text-text-secondary mb-2">Get unlimited analyses and sentiment insights.</div>
-            <button 
-              onClick={onOpenPricing}
-              className="w-full py-1.5 bg-emerald-500 hover:bg-emerald-600 text-dark-bg text-xs font-bold rounded-lg transition-colors"
-            >
-              Upgrade to Pro
-            </button>
-          </div>
-        )}
-
         <button 
           title={isCollapsed ? "Saved Analyses" : undefined}
           className={cn(
@@ -169,9 +129,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-text-primary truncate">{user.displayName || user.email}</div>
-                    <div className={cn("text-[10px] font-bold uppercase flex items-center gap-1", getPlanColor(profile?.plan))}>
-                      {getPlanIcon(profile?.plan)}
-                      {profile?.plan || 'free'} Plan
+                    <div className="text-[10px] font-bold uppercase text-text-secondary">
+                      Member
                     </div>
                   </div>
                   <button onClick={onLogout} className="text-text-secondary hover:text-red-500 transition-colors" title="Logout">

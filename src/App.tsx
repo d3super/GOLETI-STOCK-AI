@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
-import { PricingModal } from './components/PricingModal';
+import { AuthModal } from './components/AuthModal';
 import { Message, chatWithGoletiStream } from './services/gemini';
-import { auth, db, loginWithGoogle, logout, getUserProfile, createUserProfile, incrementAnalysisCount, updateUserPlan, UserProfile, handleFirestoreError, OperationType } from './firebase';
+import { auth, db, logout, getUserProfile, createUserProfile, incrementAnalysisCount, UserProfile, handleFirestoreError, OperationType } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { onSnapshot, doc } from 'firebase/firestore';
 
@@ -43,7 +43,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -78,10 +78,9 @@ export default function App() {
             console.log("Profile not found, creating new profile...");
             userProfile = await createUserProfile(firebaseUser);
           }
-          console.log("Profile loaded:", userProfile?.plan);
           setProfile(userProfile);
 
-          // Listen for profile changes (real-time plan updates)
+          // Listen for profile changes
           profileUnsubscribe = onSnapshot(
             doc(db, 'users', firebaseUser.uid), 
             (snapshot) => {
@@ -95,7 +94,6 @@ export default function App() {
           );
         } catch (error) {
           console.error("Error loading user profile:", error);
-          // Even if profile fails, we should let the user in (they might just be stuck on 'free')
         }
       } else {
         setProfile(null);
@@ -110,25 +108,9 @@ export default function App() {
   }, []);
 
   const handleSendMessage = useCallback(async (content: string) => {
-    // Check Plan Limits
     if (!user) {
-      alert("Please login to use Goleti.");
+      setIsAuthModalOpen(true);
       return;
-    }
-
-    if (profile) {
-      const today = new Date().toISOString().split('T')[0];
-      const isNewDay = profile.lastAnalysisDate !== today;
-      const currentCount = isNewDay ? 0 : profile.analysisCount;
-
-      if (profile.plan === 'free' && currentCount >= 3) {
-        alert("Free plan limit reached (3 analyses/day). Upgrade to Standard or Pro for more!");
-        return;
-      }
-      if (profile.plan === 'standard' && currentCount >= 20) {
-        alert("Standard plan limit reached (20 analyses/day). Upgrade to Pro for unlimited!");
-        return;
-      }
     }
 
     const userMessage: Message = {
@@ -198,8 +180,6 @@ export default function App() {
 
   const handleSelectChat = (id: string) => {
     setCurrentChatId(id);
-    // In a real app, we would load messages for this chat ID
-    // For this demo, we'll just clear or show a sample
     setMessages([]);
   };
 
@@ -213,39 +193,9 @@ export default function App() {
   const handleShareChat = (id: string) => {
     const chat = history.find(item => item.id === id);
     if (chat) {
-      // In a real app, this would generate a shareable link
       const shareUrl = `${window.location.origin}/share/${id}`;
       navigator.clipboard.writeText(shareUrl);
       alert(`Share link for "${chat.title}" copied to clipboard!`);
-    }
-  };
-
-  const handleUpgrade = async (plan: 'standard' | 'pro') => {
-    if (!user) return;
-    try {
-      await updateUserPlan(user.uid, plan);
-      setIsPricingOpen(false);
-      alert(`Successfully upgraded to ${plan.toUpperCase()} Plan!`);
-    } catch (error) {
-      console.error("Upgrade Error:", error);
-      alert("Failed to upgrade. Please try again.");
-    }
-  };
-
-  const handleLogin = async () => {
-    console.log("Login button clicked");
-    try {
-      await loginWithGoogle();
-      console.log("Login successful");
-    } catch (error: any) {
-      console.error("Login Error:", error);
-      if (error.code === 'auth/popup-blocked') {
-        alert("Login popup was blocked by your browser. Please allow popups for this site.");
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        // User closed the popup, no need to alert
-      } else {
-        alert(`Failed to login with Google: ${error.message}`);
-      }
     }
   };
 
@@ -263,9 +213,8 @@ export default function App() {
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           user={user}
           profile={profile}
-          onLogin={handleLogin}
+          onLogin={() => setIsAuthModalOpen(true)}
           onLogout={logout}
-          onOpenPricing={() => setIsPricingOpen(true)}
         />
         <main className="flex-1 relative">
           {isAuthLoading ? (
@@ -278,16 +227,14 @@ export default function App() {
               onSendMessage={handleSendMessage} 
               isLoading={isLoading} 
               user={user}
-              onLogin={loginWithGoogle}
+              onLogin={() => setIsAuthModalOpen(true)}
             />
           )}
         </main>
 
-        <PricingModal 
-          isOpen={isPricingOpen} 
-          onClose={() => setIsPricingOpen(false)} 
-          currentPlan={profile?.plan}
-          onUpgrade={handleUpgrade}
+        <AuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => setIsAuthModalOpen(false)} 
         />
       </div>
     </ErrorBoundary>

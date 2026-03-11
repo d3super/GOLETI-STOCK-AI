@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
@@ -7,21 +7,15 @@ import firebaseConfig from '../firebase-applet-config.json';
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const googleProvider = new GoogleAuthProvider();
 
 // Auth Helpers
-export const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const logout = () => signOut(auth);
-
-// Plan Types
-export type PlanType = 'free' | 'standard' | 'pro' | 'admin';
 
 export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
   photoURL: string;
-  plan: PlanType;
   analysisCount: number;
   lastAnalysisDate: string;
   createdAt: any;
@@ -105,8 +99,7 @@ export const createUserProfile = async (user: any) => {
     uid: user.uid,
     email: user.email || '',
     displayName: user.displayName || '',
-    photoURL: user.photoURL || '',
-    plan: 'free',
+    photoURL: user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${user.displayName || user.email}`,
     analysisCount: 0,
     lastAnalysisDate: new Date().toISOString().split('T')[0],
     createdAt: serverTimestamp(),
@@ -130,16 +123,6 @@ export const incrementAnalysisCount = async (uid: string, currentCount: number) 
       analysisCount: currentCount + 1,
       lastAnalysisDate: today
     });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, `users/${uid}`);
-    throw error;
-  }
-};
-
-export const updateUserPlan = async (uid: string, plan: PlanType) => {
-  const docRef = doc(db, 'users', uid);
-  try {
-    await updateDoc(docRef, { plan });
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `users/${uid}`);
     throw error;
