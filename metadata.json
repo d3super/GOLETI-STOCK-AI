@@ -1,5 +1,5 @@
 {
-  "name": "Goleti",
-  "description": "Intelligent AI stock analysis chatbot providing fundamental, technical, and sentiment analysis for investors.",
+  "name": "Finora",
+  "description": "Intelligent AI stock analysis chatbot providing fundamental, technical, and sentiment analysis using Gemini 3.1 Pro.",
   "requestFramePermissions": []
 }
