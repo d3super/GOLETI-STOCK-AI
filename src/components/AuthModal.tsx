@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Loader2 } from 'lucide-react';
-import { auth, createUserProfile, getUserProfile } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth, createUserProfile } from '../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,42 +18,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   if (!isOpen) return null;
 
-  const getErrorMessage = (err: any) => {
-    switch (err.code) {
-      case 'auth/operation-not-allowed':
-        return 'Authentication method is not enabled. Please enable it in the Firebase Console.';
-      case 'auth/weak-password':
-        return 'The password is too weak. Please use at least 6 characters.';
-      case 'auth/email-already-in-use':
-        return 'This email is already registered. Try logging in instead.';
-      case 'auth/invalid-credential':
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-        return 'Invalid email or password. Please check your credentials and try again.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/popup-closed-by-user':
-        return 'Sign-in window was closed before completion.';
-      case 'auth/cancelled-popup-request':
-        return 'Sign-in request was cancelled.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your internet connection.';
-      default:
-        return err.message || 'An unexpected error occurred. Please try again.';
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
-    // Client-side validation
-    if (!isLogin && password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      setIsLoading(false);
-      return;
-    }
 
     try {
       if (isLogin) {
@@ -66,29 +34,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       onClose();
     } catch (err: any) {
       console.error("Auth Error:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      
-      // Check if profile exists, if not create it
-      const profile = await getUserProfile(userCredential.user.uid);
-      if (!profile) {
-        await createUserProfile(userCredential.user);
-      }
-      
-      onClose();
-    } catch (err: any) {
-      console.error("Google Auth Error:", err);
-      setError(getErrorMessage(err));
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +96,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <input
                 type="password"
                 required
-                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -165,25 +110,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             className="w-full bg-primary-green text-dark-bg font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isLoading ? <Loader2 className="animate-spin" size={20} /> : (isLogin ? 'Login' : 'Sign Up')}
-          </button>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border-color"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-secondary-bg px-2 text-text-secondary">Or continue with</span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={isLoading}
-            className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
-          >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-            Sign in with Google
           </button>
 
           <div className="text-center pt-2">

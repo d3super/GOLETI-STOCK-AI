@@ -43,10 +43,16 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isL
       {/* Header */}
       <div className="h-16 border-b border-border-color flex items-center justify-between px-8 bg-dark-bg/80 backdrop-blur-md sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary-green rounded-lg flex items-center justify-center shadow-md">
-            <TrendingUpIcon className="w-5 h-5 text-dark-bg" />
-          </div>
-          <span className="font-bold text-lg tracking-tight text-text-primary">Goleti AI Analyst</span>
+          <img 
+            src="/logo.png" 
+            alt="Goleti Logo" 
+            className="w-6 h-6 rounded-md object-cover"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+            }}
+          />
+          <span className="font-semibold text-text-primary">Goleti AI Analyst</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-secondary-bg px-2 py-1 rounded-md border border-border-color">
@@ -59,8 +65,16 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isL
       <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto space-y-8">
-            <div className="w-24 h-24 bg-primary-green rounded-3xl flex items-center justify-center shadow-2xl border border-border-color">
-              <TrendingUpIcon className="w-12 h-12 text-dark-bg" />
+            <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden border border-border-color">
+              <img 
+                src="/logo.png" 
+                alt="Goleti Logo" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+                }}
+              />
             </div>
             <div>
               <h2 className="text-3xl font-bold mb-4">How can I help your portfolio today?</h2>
@@ -89,10 +103,20 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isL
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
-                  msg.role === 'user' ? "bg-primary-green/20 text-primary-green" : "bg-primary-green text-dark-bg"
+                  "w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden",
+                  msg.role === 'user' ? "bg-primary-green/20 text-primary-green" : "bg-white"
                 )}>
-                  {msg.role === 'user' ? <UserIcon size={16} /> : <TrendingUpIcon className="w-5 h-5" />}
+                  {msg.role === 'user' ? <UserIcon size={16} /> : (
+                    <img 
+                      src="/logo.png" 
+                      alt="Goleti" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+                      }}
+                    />
+                  )}
                 </div>
                 <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
                   {msg.role === 'user' ? 'You' : 'Goleti AI'}
@@ -109,8 +133,16 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, onSendMessage, isL
           <div className="flex justify-start">
             <div className="bg-secondary-bg/30 rounded-2xl p-6 border border-transparent max-w-[85%]">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-primary-green flex items-center justify-center">
-                  <TrendingUpIcon className="w-5 h-5 text-dark-bg animate-pulse" />
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/logo.png" 
+                    alt="Goleti" 
+                    className="w-full h-full object-cover animate-pulse"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
+                    }}
+                  />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">Goleti AI is thinking...</span>
               </div>

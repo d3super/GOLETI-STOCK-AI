@@ -1,5 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
 export interface Message {
   id: string;
   role: "user" | "model";
@@ -8,14 +10,15 @@ export interface Message {
   isAnalysis?: boolean;
 }
 
-const SYSTEM_INSTRUCTION = `You are Goleti, a professional equity research analyst and trading strategist. 
-Your goal is to provide high-signal, concise, and insightful stock analysis with actionable trading setups.
+const SYSTEM_INSTRUCTION = `You are Goleti, a professional equity research analyst. 
+Your goal is to provide high-signal, concise, and insightful stock analysis.
 
 When analyzing a stock, use this streamlined, high-impact structure:
 
 1. **Executive Snapshot**
    - Ticker, Current Price, and 24h/Recent Trend.
    - **The Bottom Line**: A 1-2 sentence "insightful take" on the company's current state.
+   - **Scenarios**: Bull (Best case), Base (Likely), Bear (Worst case) in a brief bulleted list.
 
 2. **Fundamentals & Valuation**
    - List these metrics strictly in **Bullet Points** in this exact order:
@@ -24,52 +27,28 @@ When analyzing a stock, use this streamlined, high-impact structure:
      - **Debt Equity Ratio**: [Value]
      - **Free Cash Flow**: [Value]
      - **Dividen Payout Ratio**: [Value]
-   - **Comprehensive Fundamental Insight**: Provide a deep, integrated analysis based on all the indicators above.
+   - **Comprehensive Fundamental Insight**: Provide a deep, integrated analysis based on all the indicators above. Explain how they interact (e.g., "High FCF supports the Dividend Payout despite a moderate Debt Equity Ratio").
 
 3. **Technical & Market Pulse**
-   - **News & Sentiment Analysis**: Summarize recent news headlines and analyze the prevailing sentiment.
+   - Trend analysis (Support/Resistance levels) and Market Sentiment.
+   - **News & Sentiment Analysis**: Summarize recent news headlines and analyze the prevailing sentiment (Bullish/Bearish/Neutral). Explain how current news is impacting the stock price.
    - Industry Position: Where do they stand against competitors?
 
-4. **Trading Strategy (Actionable Setup)**
-   - **Support**: [Level]
-   - **Resistance**: [Level]
-   - **Stop Loss**: [Price level calculated based on RR]
-   - **Take Profit**: [Price level calculated based on RR 1:2]
-   - **Risk-Reward (RR)**: 1:2 (Mandatory)
-   - *Note: Explain the logic for these levels based on recent chart patterns.*
-
-5. **Risk & Suitability**
+4. **Risk & Suitability**
    - Top 2-3 critical risks.
-   - **Investor Fit**: Who should consider this?
+   - **Investor Fit**: Who should consider this? (e.g., "Aggressive growth seekers" or "Dividend income focused").
 
-6. **Sources**
-   - List the primary sources used for this analysis (e.g., Yahoo Finance, Reuters, SEC Filings, Google Search results).
-
-7. **Educational Disclaimer** (Mandatory)
+5. **Educational Disclaimer** (Mandatory)
 
 Rules:
 - **Be Concise**: Avoid long paragraphs. Use bold text for emphasis.
 - **Insight First**: Don't just list data; explain *why* it matters.
-- **Markdown Mastery**: Use tables, bold headers, and bullet points.
-- **Language Matching**: Always respond in the same language as the user's input.
+- **Markdown Mastery**: Use tables, bold headers, and bullet points to make the response scannable.
+- **Language Matching**: Always respond in the same language as the user's input. If the user asks in Indonesian, respond in Indonesian. If in English, respond in English.
 - **Search Grounding**: Always pull the latest data using Google Search.
-- **No Financial Advice**: Never promise profit or give specific buy/sell commands. Always state that these are for educational purposes.`;
-
-const getApiKey = () => {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key || key === "" || key === "undefined" || key === "MY_GEMINI_API_KEY") {
-    return null;
-  }
-  return key;
-};
+- **No Financial Advice**: Never promise profit or give specific buy/sell commands.`;
 
 export async function* chatWithGoletiStream(messages: Message[]) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is missing. Please ensure you have set the GEMINI_API_KEY environment variable in your Vercel project settings.");
-  }
-  
-  const ai = new GoogleGenAI({ apiKey });
   // Use gemini-3-flash-preview for significantly faster response times
   const model = "gemini-3-flash-preview";
   
@@ -98,12 +77,7 @@ export async function* chatWithGoletiStream(messages: Message[]) {
 }
 
 export async function chatWithGoleti(messages: Message[]) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is missing.");
-  }
-  
-  const ai = new GoogleGenAI({ apiKey });
+  // Fallback to non-streaming if needed, but using flash for speed
   const model = "gemini-3-flash-preview";
   
   const chat = ai.chats.create({
@@ -129,12 +103,7 @@ export async function chatWithGoleti(messages: Message[]) {
 }
 
 export async function getQuickAnalysis(ticker: string) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is missing.");
-  }
-  
-  const ai = new GoogleGenAI({ apiKey });
+  // Use gemini-3-flash-preview for fast search-based analysis
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `Analyze the stock ticker: ${ticker}. Provide a concise summary including current price, recent trend, and key fundamental metrics.`,

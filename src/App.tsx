@@ -161,22 +161,12 @@ export default function App() {
         setHistory(prev => [newHistoryItem, ...prev]);
         setCurrentChatId(newHistoryItem.id);
       }
-    } catch (error: any) {
-      console.error("Chat Error Details:", error);
-      let errorMessage = "";
-      
-      if (error.message?.includes("GEMINI_API_KEY")) {
-        errorMessage = `## Configuration Error\n${error.message}`;
-      } else if (error.message?.includes("401") || error.message?.includes("API_KEY_INVALID")) {
-        errorMessage = "## Invalid API Key\nThe Gemini API Key you provided seems to be invalid. Please double-check your key in Vercel Environment Variables.";
-      } else if (error.message?.includes("quota") || error.message?.includes("429")) {
-        errorMessage = "## Quota Exceeded\nYou have reached the limit of your Gemini API free tier. Please try again later.";
-      } else {
-        errorMessage = `## Connection Error\n${error.message || "I encountered an issue connecting to my financial data streams. Please check your API configuration and try again."}`;
-      }
-        
+    } catch (error) {
+      console.error("Chat Error:", error);
       setMessages(prev => prev.map(msg => 
-        msg.id === aiMessageId ? { ...msg, content: errorMessage } : msg
+        msg.id === aiMessageId 
+          ? { ...msg, content: "## Error\nI encountered an issue connecting to my financial data streams. Please check your API configuration and try again." } 
+          : msg
       ));
     } finally {
       setIsLoading(false);
