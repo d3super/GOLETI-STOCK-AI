@@ -44,18 +44,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       isCollapsed ? "w-20" : "w-72"
     )}>
       <div className={cn("p-6 flex items-center gap-3", isCollapsed && "justify-center px-4")}>
-        <div className="w-10 h-10 bg-white rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg overflow-hidden border border-border-color">
-          <img 
-            src="/logo.png" 
-            alt="Goleti Logo" 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://api.dicebear.com/7.x/initials/svg?seed=Goleti&backgroundColor=059669";
-            }}
-          />
+        <div className="w-10 h-10 bg-primary-green rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg border border-border-color">
+          <TrendingUp size={24} className="text-dark-bg" />
         </div>
-        {!isCollapsed && <h1 className="text-2xl font-bold tracking-tight text-text-primary">Goleti</h1>}
+        {!isCollapsed && <h1 className="text-3xl font-black tracking-tighter text-text-primary">Goleti</h1>}
       </div>
 
       <div className={cn("px-4 mb-6", isCollapsed && "px-2")}>
